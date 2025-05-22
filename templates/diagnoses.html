@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Diagnoses{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class="h2"><i class="fas fa-diagnoses me-2"></i>Manage Diagnoses</h1>
+    </header>
+
+    {% if current_user.role == 'doctor' %}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="h5 mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Diagnosis</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('documents.manage_diagnoses') }}">
+                <div class="mb-3">
+                    <label for="user_id" class="form-label">Patient</label>
+                    <select class="form-select" id="user_id" name="user_id" required>
+                        <option value="">Select a patient</option>
+                        {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.email }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="condition" class="form-label">Condition</label>
+                    <input type="text" class="form-control" id="condition" name="condition" required>
+                </div>
+                <div class="mb-3">
+                    <label for="diagnosis_date" class="form-label">Diagnosis Date</label>
+                    <input type="date" class="form-control" id="diagnosis_date" name="diagnosis_date" required>
+                </div>
+                <div class="mb-3">
+                    <label for="visit_id" class="form-label">Related Doctor Visit (Optional)</label>
+                    <select class="form-select" id="visit_id" name="visit_id">
+                        <option value="">None</option>
+                        {% for visit in visits %}
+                        <option value="{{ visit.id }}">{{ visit.doctor_name }} - {{ visit.visit_date.strftime('%Y-%m-%d') }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="details" class="form-label">Details</label>
+                    <textarea class="form-control" id="details" name="details" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="fas fa-save me-2"></i>Add Diagnosis</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h3 class="h5 mb-0"><i class="fas fa-list me-2"></i>Diagnoses</h3>
+        </div>
+        <div class="card-body">
+            {% if diagnoses %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        {% if current_user.role in ['admin', 'doctor'] %}
+                        <th>User</th>
+                        {% endif %}
+                        <th>Date</th>
+                        <th>Condition</th>
+                        <th>Details</th>
+                        <th>Related Visit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for diagnosis in diagnoses %}
+                    <tr>
+                        {% if current_user.role in ['admin', 'doctor'] %}
+                        <td>{{ diagnosis.owner.email }}</td>
+                        {% endif %}
+                        <td>{{ diagnosis.diagnosis_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ diagnosis.condition }}</td>
+                        <td>{{ diagnosis.details or 'No details' }}</td>
+                        <td>
+                            {% if diagnosis.visit %}
+                            {{ diagnosis.visit.doctor_name }} - {{ diagnosis.visit.visit_date.strftime('%Y-%m-%d') }}
+                            {% else %}
+                            None
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No diagnoses recorded.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

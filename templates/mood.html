@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Mood Journal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class="h2"><i class="fas fa-smile me-2"></i>Manage Mood Journal</h1>
+    </header>
+
+    {% if current_user.role == 'user' %}
+    <!-- Add Mood Entry Form (Users Only) -->
+    <div class="p-5 bg-light border rounded-3 shadow-lg mb-4">
+        <h2>Add a New Mood Entry</h2>
+        <form method="POST" action="{{ url_for('documents.manage_mood') }}">
+            <div class="mb-3">
+                <label for="mood" class="form-label">Mood</label>
+                <select class="form-select" id="mood" name="mood" required>
+                    {% for option in mood_options %}
+                    <option value="{{ option.label }}">{{ option.emoji }} {{ option.label }} (Score: {{ option.score }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="entry_date" class="form-label">Entry Date</label>
+                <input type="date" class="form-control" id="entry_date" name="entry_date" required>
+            </div>
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes</label>
+                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Enter any notes about your mood"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4"><i class="fas fa-plus me-2"></i>Add Mood Entry</button>
+            <a href="{{ url_for('documents.dashboard') }}" class="btn btn-secondary btn-lg rounded-pill px-4">Cancel</a>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- List of Mood Entries -->
+    <div class="p-5 bg-light border rounded-3 shadow-lg">
+        <h2>{% if current_user.role == 'admin' %}All Users' Mood Entries{% else %}Your Mood Entries{% endif %}</h2>
+        {% if moods %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <th>User</th>
+                    {% endif %}
+                    <th>Date</th>
+                    <th>Mood</th>
+                    <th>Score</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mood in moods %}
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <td>{{ mood.owner.email }}</td>
+                    {% endif %}
+                    <td>{{ mood.entry_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ mood.mood }}</td>
+                    <td>{{ mood.mood_score }}</td>
+                    <td>{{ mood.notes or 'No notes' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No mood entries recorded yet.</p>
+        {% endif %}
+        {% if current_user.role != 'user' %}
+        <a href="{{ url_for('documents.dashboard') }}" class="btn btn-secondary btn-lg rounded-pill px-4">Back to Dashboard</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

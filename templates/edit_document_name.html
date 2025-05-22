@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Document Name{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Edit Document Name</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('documents.edit_document_name', document_id=document.id) }}">
+                        <div class="form-group mb-3">
+                            <label for="filename" class="form-label">Document Name</label>
+                            <input type="text" class="form-control" id="filename" name="filename" value="{{ document.filename }}" required>
+                            <small class="form-text text-muted">You can only edit the document name, not its content.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <p><strong>Document Details:</strong></p>
+                            <ul class="list-group">
+                                <li class="list-group-item">Original Filename: {{ document.filename }}</li>
+                                <li class="list-group-item">Upload Date: {{ document.upload_date.strftime('%Y-%m-%d %H:%M:%S') }}</li>
+                                <li class="list-group-item">Owner: {{ document.owner.email }}</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('documents.list_documents') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

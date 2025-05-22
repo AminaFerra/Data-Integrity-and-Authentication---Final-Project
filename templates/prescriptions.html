@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Prescriptions{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class="h2"><i class="fas fa-prescription-bottle me-2"></i>Manage Prescriptions</h1>
+    </header>
+
+    {% if current_user.role == 'doctor' %}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="h5 mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Prescription</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('documents.manage_prescriptions') }}">
+                <div class="mb-3">
+                    <label for="user_id" class="form-label">Patient</label>
+                    <select class="form-select" id="user_id" name="user_id" required>
+                        <option value="">Select a patient</option>
+                        {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.email }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="medication" class="form-label">Medication</label>
+                    <input type="text" class="form-control" id="medication" name="medication" required>
+                </div>
+                <div class="mb-3">
+                    <label for="dosage" class="form-label">Dosage</label>
+                    <input type="text" class="form-control" id="dosage" name="dosage">
+                </div>
+                <div class="mb-3">
+                    <label for="prescribed_date" class="form-label">Prescribed Date</label>
+                    <input type="date" class="form-control" id="prescribed_date" name="prescribed_date" required>
+                </div>
+                <div class="mb-3">
+                    <label for="visit_id" class="form-label">Related Doctor Visit (Optional)</label>
+                    <select class="form-select" id="visit_id" name="visit_id">
+                        <option value="">None</option>
+                        {% for visit in visits %}
+                        <option value="{{ visit.id }}">{{ visit.doctor_name }} - {{ visit.visit_date.strftime('%Y-%m-%d') }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="instructions" class="form-label">Instructions</label>
+                    <textarea class="form-control" id="instructions" name="instructions" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="fas fa-save me-2"></i>Add Prescription</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h3 class="h5 mb-0"><i class="fas fa-list me-2"></i>Prescriptions</h3>
+        </div>
+        <div class="card-body">
+            {% if prescriptions %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        {% if current_user.role in ['admin', 'doctor'] %}
+                        <th>User</th>
+                        {% endif %}
+                        <th>Date</th>
+                        <th>Medication</th>
+                        <th>Dosage</th>
+                        <th>Instructions</th>
+                        <th>Related Visit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prescription in prescriptions %}
+                    <tr>
+                        {% if current_user.role in ['admin', 'doctor'] %}
+                        <td>{{ prescription.owner.email }}</td>
+                        {% endif %}
+                        <td>{{ prescription.prescribed_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ prescription.medication }}</td>
+                        <td>{{ prescription.dosage or 'N/A' }}</td>
+                        <td>{{ prescription.instructions or 'No instructions' }}</td>
+                        <td>
+                            {% if prescription.visit %}
+                            {{ prescription.visit.doctor_name }} - {{ prescription.visit.visit_date.strftime('%Y-%m-%d') }}
+                            {% else %}
+                            None
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No prescriptions recorded.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

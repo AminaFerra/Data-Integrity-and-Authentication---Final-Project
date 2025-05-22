@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Verify 2FA Code{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0 rounded-3">
+            <div class="card-body p-4 p-md-5 text-center">
+                <h2 class="card-title mb-4 fw-bold"><i class="fas fa-key me-2"></i>Verify 2FA Code</h2>
+                <p class="lead">Enter the 6-digit code from your authenticator app to complete login.</p>
+                <form method="POST" action="{{ url_for('auth.verify_2fa_on_login', next=request.args.get('next')) }}" novalidate>
+                    <div class="mb-3">
+                        <label for="code" class="form-label visually-hidden">2FA Code</label>
+                        <input type="text" class="form-control form-control-lg rounded-pill text-center" id="code" name="code" placeholder="Enter 6-digit code" required pattern="\d{6}" maxlength="6" inputmode="numeric" autofocus>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill"><i class="fas fa-check-circle me-2"></i>Verify Code</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

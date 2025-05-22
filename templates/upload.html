@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Upload New Document{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card shadow-lg border-0 rounded-3">
+             <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0 fw-bold"><i class="fas fa-cloud-upload-alt me-2"></i>Upload a New Document</h2>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <div class="security-features mb-4">
+                    <h6 class="text-info"><i class="fas fa-shield-alt"></i> Security Features</h6>
+                    <p class="small text-muted">Your document will be automatically:</p>
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-lock text-success"></i> <strong>Encrypted:</strong> Using AES-256 to protect your data.</li>
+                        <li><i class="fas fa-fingerprint text-success"></i> <strong>Integrity Secured:</strong> With HMAC-SHA256 to detect any modifications.</li>
+                        <li><i class="fas fa-signature text-success"></i> <strong>Authenticity Guaranteed:</strong> Through Digital Signature to verify origin.</li>
+                    </ul>
+                </div>
+                <p class="card-text mb-4">Select a file to securely upload. Supported formats: PDF, DOCX, TXT. Max file size: {{ config.MAX_CONTENT_LENGTH // (1024*1024) }}MB.</p>
+                <form method="POST" enctype="multipart/form-data" action="{{ url_for('documents.upload') }}" novalidate>
+                    <div class="mb-3">
+                        <label for="file" class="form-label fs-5">Choose file:</label>
+                        <input type="file" class="form-control form-control-lg rounded-pill" id="file" name="file" accept=".pdf,.docx,.txt" required>
+                         <div class="form-text mt-1">Ensure your file is one of the supported types.</div>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill"><i class="fas fa-upload me-2"></i>Upload, Encrypt & Sign</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

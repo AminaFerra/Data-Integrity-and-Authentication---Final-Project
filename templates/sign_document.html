@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Document{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="card-title text-center mb-4 fw-bold"><i class="fas fa-signature me-2"></i>Sign Document</h2>
+                    {% include '_flashes.html' %}
+                    <p class="text-center mb-4">You have successfully uploaded <strong>{{ document.filename }}</strong>. Would you like to digitally sign this document?</p>
+                    <p class="text-center text-muted mb-4">A digital signature ensures the authenticity of the document and confirms your identity as the signer.</p>
+                    <form method="POST" action="{{ url_for('documents.sign_document', document_id=document.id) }}">
+                        <div class="d-flex justify-content-center gap-3 mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="sign_document" id="signYes" value="yes" required>
+                                <label class="form-check-label" for="signYes">
+                                    Yes, I want to sign this document
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="sign_document" id="signNo" value="no" required>
+                                <label class="form-check-label" for="signNo">
+                                    No, I do not want to sign
+                                </label>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <button type="submit" class="btn btn-primary rounded-pill"><i class="fas fa-check me-2"></i>Confirm</button>
+                            <a href="{{ url_for('documents.list_documents') }}" class="btn btn-secondary rounded-pill"><i class="fas fa-times me-2"></i>Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

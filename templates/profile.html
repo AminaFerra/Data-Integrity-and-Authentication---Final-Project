@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="h2 pb-3 mb-4 border-bottom"><i class="fas fa-user-edit me-2"></i>Edit Your Profile</h1>
+
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <h3 class="card-title mb-4">Account Information</h3>
+                    <form method="POST" action="{{ url_for('rbac.profile') }}" novalidate>
+                        <div class="mb-3">
+                            <label for="email" class="form-label"><i class="fas fa-envelope me-2"></i>Email Address</label>
+                            <input type="email" class="form-control form-control-lg rounded-pill" id="email" name="email" value="{{ current_user.email }}" disabled readonly>
+                            <div class="form-text">Your email address cannot be changed.</div>
+                        </div>
+
+                        <hr class="my-4">
+                        <h4 class="mb-3">Change Password</h4>
+                        {% if not current_user.password %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-1"></i> Your account was created using an external provider (e.g., GitHub). You can set a local password here if you wish to log in directly.
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label"><i class="fas fa-key me-2"></i>Current Password</label>
+                            <input type="password" class="form-control form-control-lg rounded-pill" id="current_password" name="current_password" {% if not current_user.password %}placeholder="Leave blank if setting password for the first time"{% endif %}>
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label"><i class="fas fa-lock me-2"></i>New Password</label>
+                            <input type="password" class="form-control form-control-lg rounded-pill" id="new_password" name="new_password" minlength="8">
+                            <div class="form-text">Leave blank if you don't want to change your password. Must be at least 8 characters.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirm_new_password" class="form-label"><i class="fas fa-lock me-2"></i>Confirm New Password</label>
+                            <input type="password" class="form-control form-control-lg rounded-pill" id="confirm_new_password" name="confirm_new_password">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill"><i class="fas fa-save me-2"></i>Update Profile</button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+                    <h4 class="mb-3">Two-Factor Authentication (2FA)</h4>
+                    {% if current_user.twofa_secret %}
+                        <div class="alert alert-success d-flex align-items-center">
+                           <i class="fas fa-check-circle fa-2x me-3"></i>
+                           <div>
+                               <strong>2FA is currently enabled on your account.</strong><br>
+                               This adds an extra layer of security to your login.
+                           </div>
+                        </div>
+                        <a href="{{ url_for('auth.disable_2fa') }}" class="btn btn-warning rounded-pill"><i class="fas fa-key-slash me-2"></i>Disable 2FA</a>
+                    {% else %}
+                        <div class="alert alert-warning d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                            <div>
+                                <strong>2FA is currently disabled.</strong><br>
+                                Enable 2FA for enhanced account security.
+                            </div>
+                        </div>
+                        <a href="{{ url_for('auth.setup_2fa') }}" class="btn btn-success rounded-pill"><i class="fas fa-shield-alt me-2"></i>Enable 2FA</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Doctor Visits{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class="h2"><i class="fas fa-stethoscope me-2"></i>Manage Doctor Visits</h1>
+    </header>
+
+    {% if current_user.role == 'user' %}
+    <!-- Add Doctor Visit Form (Users Only) -->
+    <div class="p-5 bg-light border rounded-3 shadow-lg mb-4">
+        <h2>Add a New Doctor Visit</h2>
+        <form method="POST" action="{{ url_for('documents.manage_doctor_visits') }}">
+            <div class="mb-3">
+                <label for="visit_date" class="form-label">Visit Date</label>
+                <input type="date" class="form-control" id="visit_date" name="visit_date" required>
+            </div>
+            <div class="mb-3">
+                <label for="doctor_name" class="form-label">Doctor Name</label>
+                <input type="text" class="form-control" id="doctor_name" name="doctor_name" placeholder="Enter doctor's name" required>
+            </div>
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes</label>
+                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Enter any notes about the visit"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4"><i class="fas fa-plus me-2"></i>Add Visit</button>
+            <a href="{{ url_for('documents.dashboard') }}" class="btn btn-secondary btn-lg rounded-pill px-4">Cancel</a>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- List of Doctor Visits -->
+    <div class="p-5 bg-light border rounded-3 shadow-lg">
+        <h2>{% if current_user.role == 'admin' %}All Users' Doctor Visits{% else %}Your Doctor Visits{% endif %}</h2>
+        {% if visits %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <th>User</th>
+                    {% endif %}
+                    <th>Date</th>
+                    <th>Doctor</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visit in visits %}
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <td>{{ visit.owner.email }}</td>
+                    {% endif %}
+                    <td>{{ visit.visit_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ visit.doctor_name }}</td>
+                    <td>{{ visit.notes or 'No notes' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No doctor visits recorded yet.</p>
+        {% endif %}
+        {% if current_user.role != 'user' %}
+        <a href="{{ url_for('documents.dashboard') }}" class="btn btn-secondary btn-lg rounded-pill px-4">Back to Dashboard</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

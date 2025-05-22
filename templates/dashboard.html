@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class="h2"><i class="fas fa-tachometer-alt me-2"></i>Welcome to Your Dashboard, {{ current_user.email }}!</h1>
+    </header>
+
+    <div class="row align-items-md-stretch">
+        <div class="col-md-6 mb-4">
+            <div class="h-100 p-5 bg-light border rounded-3 shadow-lg">
+                <h2><i class="fas fa-file-alt me-2"></i>Your Documents</h2>
+                <p>You currently have <strong>{{ document_count }}</strong> document(s) stored securely.</p>
+                <a href="{{ url_for('documents.list_documents') }}" class="btn btn-outline-primary btn-lg rounded-pill px-4 me-2" type="button"><i class="fas fa-list me-2"></i>View Documents</a>
+                <a href="{{ url_for('documents.upload') }}" class="btn btn-primary btn-lg rounded-pill px-4" type="button"><i class="fas fa-upload me-2"></i>Upload New</a>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="h-100 p-5 bg-light border rounded-3 shadow-lg">
+                <h2><i class="fas fa-user-cog me-2"></i>Account Settings</h2>
+                <p>Manage your profile information and security settings.</p>
+                <a href="{{ url_for('rbac.profile') }}" class="btn btn-outline-secondary btn-lg rounded-pill px-4" type="button"><i class="fas fa-user-edit me-2"></i>Edit Profile</a>
+                {% if not current_user.twofa_secret %}
+                    <a href="{{ url_for('auth.setup_2fa') }}" class="btn btn-outline-success btn-lg rounded-pill px-4 ms-2" type="button"><i class="fas fa-shield-alt me-2"></i>Enable 2FA</a>
+                {% else %}
+                    <a href="{{ url_for('auth.disable_2fa') }}" class="btn btn-outline-warning btn-lg rounded-pill px-4 ms-2" type="button"><i class="fas fa-shield-slash me-2"></i>Disable 2FA</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctor Visits -->
+    <div class="mt-4 p-5 bg-light border rounded-3 shadow-lg">
+        <h2><i class="fas fa-stethoscope me-2"></i>Recent Doctor Visits</h2>
+        {% if doctor_visits %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <th>User</th>
+                    {% endif %}
+                    <th>Date</th>
+                    <th>Doctor</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visit in doctor_visits %}
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <td>{{ visit.owner.email }}</td>
+                    {% endif %}
+                    <td>{{ visit.visit_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ visit.doctor_name }}</td>
+                    <td>{{ visit.notes or 'No notes' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No doctor visits recorded.</p>
+        {% endif %}
+        <a href="{{ url_for('documents.manage_doctor_visits') }}" class="btn btn-outline-primary btn-lg rounded-pill px-4" type="button"><i class="fas fa-plus me-2"></i>{% if current_user.role == 'user' %}Add Visit{% else %}View Visits{% endif %}</a>
+    </div>
+
+    <!-- Diagnoses -->
+    <div class="mt-4 p-5 bg-light border rounded-3 shadow-lg">
+        <h2><i class="fas fa-diagnoses me-2"></i>Recent Diagnoses</h2>
+        {% if diagnoses %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <th>User</th>
+                    {% endif %}
+                    <th>Date</th>
+                    <th>Condition</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for diagnosis in diagnoses %}
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <td>{{ diagnosis.owner.email }}</td>
+                    {% endif %}
+                    <td>{{ diagnosis.diagnosis_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ diagnosis.condition }}</td>
+                    <td>{{ diagnosis.details or 'No details' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No diagnoses recorded.</p>
+        {% endif %}
+        <a href="{{ url_for('documents.manage_diagnoses') }}" class="btn btn-outline-primary btn-lg rounded-pill px-4" type="button"><i class="fas fa-plus me-2"></i>{% if current_user.role == 'doctor' %}Add Diagnosis{% else %}View Diagnoses{% endif %}</a>
+    </div>
+
+    <!-- Prescriptions -->
+    <div class="mt-4 p-5 bg-light border rounded-3 shadow-lg">
+        <h2><i class="fas fa-prescription-bottle me-2"></i>Recent Prescriptions</h2>
+        {% if prescriptions %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <th>User</th>
+                    {% endif %}
+                    <th>Date</th>
+                    <th>Medication</th>
+                    <th>Dosage</th>
+                    <th>Instructions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prescription in prescriptions %}
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <td>{{ prescription.owner.email }}</td>
+                    {% endif %}
+                    <td>{{ prescription.prescribed_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ prescription.medication }}</td>
+                    <td>{{ prescription.dosage or 'N/A' }}</td>
+                    <td>{{ prescription.instructions or 'No instructions' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No prescriptions recorded.</p>
+        {% endif %}
+        <a href="{{ url_for('documents.manage_prescriptions') }}" class="btn btn-outline-primary btn-lg rounded-pill px-4" type="button"><i class="fas fa-plus me-2"></i>{% if current_user.role == 'doctor' %}Add Prescription{% else %}View Prescriptions{% endif %}</a>
+    </div>
+
+    <!-- To-Do Items -->
+    <div class="mt-4 p-5 bg-light border rounded-3 shadow-lg">
+        <h2><i class="fas fa-tasks me-2"></i>Recent To-Do Items</h2>
+        {% if todo_items %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for todo in todo_items %}
+                <tr>
+                    <td>{{ todo.task }}</td>
+                    <td>{{ todo.due_date.strftime('%Y-%m-%d') if todo.due_date else 'No due date' }}</td>
+                    <td>{{ 'Completed' if todo.completed else 'Pending' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No to-do items recorded.</p>
+        {% endif %}
+        <a href="{{ url_for('documents.manage_todo') }}" class="btn btn-outline-primary btn-lg rounded-pill px-4" type="button"><i class="fas fa-plus me-2"></i>{% if current_user.role == 'user' %}Add To-Do{% else %}View To-Dos{% endif %}</a>
+    </div>
+
+    <!-- Mood Entries -->
+    <div class="mt-4 p-5 bg-light border rounded-3 shadow-lg">
+        <h2><i class="fas fa-smile me-2"></i>Recent Mood Entries</h2>
+        {% if mood_entries %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <th>User</th>
+                    {% endif %}
+                    <th>Date</th>
+                    <th>Mood</th>
+                    <th>Score</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mood in mood_entries %}
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <td>{{ mood.owner.email }}</td>
+                    {% endif %}
+                    <td>{{ mood.entry_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ mood.mood }}</td>
+                    <td>{{ mood.mood_score }}</td>
+                    <td>{{ mood.notes or 'No notes' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No mood entries recorded.</p>
+        {% endif %}
+        <a href="{{ url_for('documents.manage_mood') }}" class="btn btn-outline-primary btn-lg rounded-pill px-4" type="button"><i class="fas fa-plus me-2"></i>{% if current_user.role == 'user' %}Add Mood{% else %}View Moods{% endif %}</a>
+    </div>
+
+    <!-- Wellness Chart -->
+    {% if wellness_chart %}
+    <div class="mt-4 p-5 bg-light border rounded-3 shadow-lg">
+        <h2><i class="fas fa-chart-line me-2"></i>Your Wellness Over Time</h2>
+        <img src="{{ wellness_chart }}" alt="Wellness Chart" class="img-fluid" style="max-width: 100%;">
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

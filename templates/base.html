@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SecureDocs{% endblock %} - Document Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                <i class="fas fa-shield-alt me-2"></i>MINDFUL
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if current_page == 'dashboard' %}active{% endif %}" href="{{ url_for('documents.dashboard') }}"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if current_page == 'upload' %}active{% endif %}" href="{{ url_for('documents.upload') }}"><i class="fas fa-upload me-1"></i>Upload File</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if current_page == 'list_documents' %}active{% endif %}" href="{{ url_for('documents.list_documents') }}"><i class="fas fa-list me-1"></i>My Documents</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarRecordsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-notes-medical me-1"></i>Records
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarRecordsDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('documents.manage_doctor_visits') }}"><i class="fas fa-stethoscope me-2"></i>Doctor Visits</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('documents.manage_diagnoses') }}"><i class="fas fa-diagnoses me-2"></i>Diagnoses</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('documents.manage_prescriptions') }}"><i class="fas fa-prescription-bottle me-2"></i>Prescriptions</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('documents.manage_todo') }}"><i class="fas fa-tasks me-2"></i>To-Do Items</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('documents.manage_mood') }}"><i class="fas fa-smile me-2"></i>Mood Entries</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {% if current_page in ['profile', 'setup_2fa', 'disable_2fa'] %}active{% endif %}" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-1"></i>{{ current_user.email }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+                                <li><a class="dropdown-item {% if current_page == 'profile' %}active{% endif %}" href="{{ url_for('rbac.profile') }}"><i class="fas fa-user-edit me-2"></i>Profile</a></li>
+                                {% if not current_user.twofa_secret %}
+                                <li><a class="dropdown-item {% if current_page == 'setup_2fa' %}active{% endif %}" href="{{ url_for('auth.setup_2fa') }}"><i class="fas fa-key me-2"></i>Enable 2FA</a></li>
+                                {% else %}
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" action="{{ url_for('auth.logout') }}" style="display:inline;">
+                                        <button type="submit" class="dropdown-item" style="width:100%;text-align:left;">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                        {% if is_admin_user %} {# Using the context processor variable #}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {% if current_page in ['list_users', 'audit_logs_list'] %}active{% endif %}" href="#" id="navbarAdminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-cogs me-1"></i>Admin
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarAdminDropdown">
+                                <li><a class="dropdown-item {% if current_page == 'list_users' %}active{% endif %}" href="{{ url_for('rbac.list_users') }}"><i class="fas fa-users-cog me-2"></i>Manage Users</a></li>
+                                <li><a class="dropdown-item {% if current_page == 'audit_logs_list' %}active{% endif %}" href="{{ url_for('security.audit_logs_list') }}"><i class="fas fa-history me-2"></i>Audit Logs</a></li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'auth.login' %}active{% endif %}" href="{{ url_for('auth.login') }}"><i class="fas fa-sign-in-alt me-1"></i>Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'auth.signup' %}active{% endif %}" href="{{ url_for('auth.signup') }}"><i class="fas fa-user-plus me-1"></i>Sign Up</a>
+                        </li>
+                    {% endif %}
+                    {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                    <li class="nav-item">
+                    <a class="nav-link {% if current_page =='list_users'%}active{% endif %}" href="{{ url_for('rbac.list_users') }}">
+                    User Management
+                    </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4 mb-5 flex-grow-1">
+        {% include '_flashes.html' %} {# Include flash messages partial #}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-light text-center text-lg-start mt-auto py-3 border-top">
+        <div class="container">
+            <p class="text-muted mb-0">&copy; <span id="currentYear"></span> MINDFUL. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

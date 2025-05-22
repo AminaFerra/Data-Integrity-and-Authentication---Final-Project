@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Manage To-Do List{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class="h2"><i class="fas fa-tasks me-2"></i>Manage To-Do List</h1>
+    </header>
+
+    {% if current_user.role == 'user' %}
+    <!-- Add To-Do Form (Users Only) -->
+    <div class="p-5 bg-light border rounded-3 shadow-lg mb-4">
+        <h2>Add a New To-Do Item</h2>
+        <form method="POST" action="{{ url_for('documents.manage_todo') }}">
+            <div class="mb-3">
+                <label for="task" class="form-label">Task</label>
+                <input type="text" class="form-control" id="task" name="task" placeholder="Enter task description" required>
+            </div>
+            <div class="mb-3">
+                <label for="due_date" class="form-label">Due Date (Optional)</label>
+                <input type="date" class="form-control" id="due_date" name="due_date">
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="completed" name="completed">
+                <label class="form-check-label" for="completed">Mark as Completed</label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4"><i class="fas fa-plus me-2"></i>Add To-Do</button>
+            <a href="{{ url_for('documents.dashboard') }}" class="btn btn-secondary btn-lg rounded-pill px-4">Cancel</a>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- List of To-Do Items -->
+    <div class="p-5 bg-light border rounded-3 shadow-lg">
+        <h2>{% if current_user.role == 'admin' %}All Users' To-Do Items{% else %}Your To-Do Items{% endif %}</h2>
+        {% if todos %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <th>User</th>
+                    {% endif %}
+                    <th>Task</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Created On</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for todo in todos %}
+                <tr>
+                    {% if current_user.role == 'admin' %}
+                    <td>{{ todo.owner.email }}</td>
+                    {% endif %}
+                    <td>{{ todo.task }}</td>
+                    <td>{{ todo.due_date.strftime('%Y-%m-%d') if todo.due_date else 'No due date' }}</td>
+                    <td>{{ 'Completed' if todo.completed else 'Pending' }}</td>
+                    <td>{{ todo.created_at.strftime('%Y-%m-%d') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No to-do items recorded yet.</p>
+        {% endif %}
+        {% if current_user.role != 'user' %}
+        <a href="{{ url_for('documents.dashboard') }}" class="btn btn-secondary btn-lg rounded-pill px-4">Back to Dashboard</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
